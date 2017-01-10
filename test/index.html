@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<style>
+			*{
+				margin:0;
+				padding:0;
+			}
+			.container{
+				width:100px;
+				height:708px;
+				margin:0 auto;
+				perspective: 600px;
+				/*-webkit-transform-style: preserve-3d;*/
+				cursor: pointer;
+			}
+			.demo{
+				width:50px;
+				height:708px;
+				
+				-webkit-transform: translateZ(500px);
+				-webkit-transform-style: preserve-3d;
+				
+			}
+			.box{
+				width:50px;
+				height:708px;
+				position: relative;
+				-webkit-transform-style: preserve-3d;
+				-webkit-transform-origin: 50% 50%;
+			}
+			.box div{
+				width:50px;
+				height:708px;
+				position: absolute;
+				background: url(img/kebi.jpg) no-repeat;
+				/*-webkit-transform-style: preserve-3d;*/
+				opacity: 0.7;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container" id="container">
+			<div class="demo">
+				<div class="box" id="box"></div>
+			</div>
+		</div>
+		<script>
+		var box = document.getElementById('box')
+		for(var i = 0;i<20;i++){
+			var imgs = document.createElement('div');
+			imgs.style.backgroundPositionX= -i*50 +"px";
+			imgs.style.transform = "rotateY("+i*18+"deg) translateZ(162px)";
+			box.appendChild(imgs);
+		}
+		var move = document.getElementById('container');
+		move.addEventListener('touchstart',touchStart,false);
+		move.addEventListener('touchmove',touchMove,false);
+		move.addEventListener('touchend',touchEnd,false);
+		var startX = startY = moveX = moveY = 0;
+		var rotatex,rotatey = 0;
+		
+		function touchStart(event){
+			var e = event || window.event;
+			var touch = e.touches[0];			
+			startX = touch.clientX;
+			startY = touch.clientY;
+			var rr = JSON.parse(window.sessionStorage.getItem('value'));
+			if(rr){
+				rotatex = rr.rx;
+				rotatey = rr.ry;
+			}else{
+				rotatex = 0;
+				rotatey = 0
+			}
+			
+		}
+		
+		function touchMove(event){
+			var e = event || window.event;
+			var touch = e.touches[0];
+			moveX = touch.clientX;
+			moveY = touch.clientY;
+			var x = -(moveX-startX)*360/1000+parseFloat(rotatey);
+			var y= (moveY-startY)*360/1000+parseFloat(rotatex);
+			//console.log(x)
+			
+			box.style.WebkitTransform = "rotateX("+y+"deg) rotateY("+x+"deg) translateZ(-80px)"
+			box.style.transition = "all 0.5s"
+			var s = box.style.transform;
+			//console.log(s)
+			var reg = /(\-|\d)?\d+[^\)]+\d/g;
+			var r = s.match(reg);
+			if(r){
+				if(r.length>1){
+					var rotate = {
+						rx:r[0],
+						ry:r[1]
+					}
+					window.sessionStorage.setItem('value',JSON.stringify(rotate))
+				}
+			}
+			
+		}
+		function touchEnd(){
+			
+			var x=  JSON.parse(window.sessionStorage.getItem('value'));
+			//console.log(x)
+			if(x){
+				box.style.transform = "rotateX("+x.rx+"deg) rotateY("+x.ry+"deg) translateZ(0)"
+			}
+			
+		}
+		window.onload = function(){
+			window.sessionStorage.removeItem('value')
+		}
+		</script>
+	</body>
+</html>
